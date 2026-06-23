@@ -1,0 +1,1 @@
+"""SmartVote backend package."""

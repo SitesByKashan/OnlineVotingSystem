@@ -1,65 +1,122 @@
-import Image from "next/image";
+import Link from "next/link";
+import BrandLogo from "./components/BrandLogo";
+import { HomeHeroActions, HomeNavActions } from "./components/HomeSession";
 
-export default function Home() {
+const stats = [
+  ["JWT", "Secure sessions"],
+  ["OTP", "SMTP verification"],
+  ["1 vote", "Per election"],
+  ["Live", "WebSocket results"],
+];
+
+const features = [
+  ["AI Chatbot", "Voter guidance for OTP, eligibility, vote flow, and receipts."],
+  ["Fraud Monitoring", "Duplicate votes, failed logins, and suspicious activity alerts."],
+  ["QR Receipt", "A verifiable receipt code and QR payload after successful voting."],
+  ["Admin Copilot", "Election health, analytics, and security recommendations."],
+];
+
+const startupModules = [
+  "3D Election Command Center",
+  "AI Fraud Detection Engine",
+  "DSA Visualization Lab",
+  "Vote Ledger Replay",
+  "Interactive Risk Graph",
+  "Real-Time Analytics",
+];
+
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="site-page">
+      <nav className="topbar">
+        <Link className="logo" href="/"><BrandLogo /></Link>
+        <HomeNavActions />
+      </nav>
+
+      <section className="hero">
+        <div className="hero-copy">
+          <span className="badge">AI Powered Online Voting System</span>
+          <h1>Secure digital elections with AI monitoring and live results.</h1>
+          <p>
+            SmartVote combines OTP verified identities, JWT sessions, one-user-one-vote enforcement,
+            QR receipts, real-time leaderboards, and an AI assistant in one modern SaaS platform.
           </p>
+          <HomeHeroActions />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="hero-product" aria-label="SmartVote product preview">
+          <span className="hero-satellite sat-a">Smart</span>
+          <span className="hero-satellite sat-b">Voting</span>
+          <span className="hero-satellite sat-c">System</span>
+          <span className="hero-depth-ring depth-one" />
+          <span className="hero-depth-ring depth-two" />
+          <div className="product-window">
+            <span className="window-glow-line line-one" />
+            <span className="window-glow-line line-two" />
+            <div className="window-head"><span /><span /><span /></div>
+            <div className="result-card elevated">
+              <small>Live election</small>
+              <strong>SSUET Student Council</strong>
+              <div className="progress-line"><i style={{ width: "68%" }} /></div>
+            </div>
+            <div className="mini-grid">
+              <div><strong>1,284</strong><span>Verified voters</span></div>
+              <div><strong>72%</strong><span>Turnout</span></div>
+              <div><strong>Low</strong><span>AI risk</span></div>
+              <div><strong>3</strong><span>Candidates</span></div>
+            </div>
+            <div className="hero-ledger">
+              <span>Vote hash</span>
+              <strong>0xA91F...CF31</strong>
+              <small>Receipt verified live</small>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="stat-strip">
+        {stats.map(([value, label]) => (
+          <div key={label}><strong>{value}</strong><span>{label}</span></div>
+        ))}
+      </section>
+
+      <section className="feature-section">
+        <div className="section-heading">
+          <span className="badge">Exhibition ready</span>
+          <h2>Everything needed for a polished voting demo.</h2>
+        </div>
+        <div className="feature-grid">
+          {features.map(([title, body]) => (
+            <article key={title}>
+              <span className="feature-icon">{title.slice(0, 2)}</span>
+              <h3>{title}</h3>
+              <p>{body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="startup-section">
+        <div className="section-heading">
+          <span className="badge">Startup-grade platform</span>
+          <h2>Built to feel like a real election intelligence product.</h2>
+        </div>
+        <div className="startup-grid">
+          <div className="startup-command-preview">
+            <span className="preview-ring one" />
+            <span className="preview-ring two" />
+            <div className="preview-core">SV</div>
+          </div>
+          <div className="startup-module-list">
+            {startupModules.map((module) => (
+              <article key={module}>
+                <strong>{module}</strong>
+                <span>Available in the premium admin console</span>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

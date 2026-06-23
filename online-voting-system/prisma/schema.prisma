@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  fullName        String           @map("full_name")
+  email           String           @unique
+  passwordHash    String           @map("password_hash")
+  role            String           @default("VOTER")
+  isEmailVerified Boolean          @default(false) @map("is_email_verified")
+  isBlocked       Boolean          @default(false) @map("is_blocked")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  otpCodes        OtpCode[]
+  jwtSessions     JwtSession[]
+  createdElections Election[]      @relation("ElectionCreator")
+  votes           Vote[]
+  auditLogs       AuditLog[]
+  securityEvents  SecurityEvent[]
+  aiConversations AiConversation[]
+  notifications   Notification[]
+
+  @@index([role])
+  @@index([isEmailVerified])
+  @@map("users")
+}
+
+model OtpCode {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  email     String
+  codeHash  String    @map("code_hash")
+  purpose   String
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@index([email, purpose])
+  @@map("otp_codes")
+}
+
+model JwtSession {
+  id               Int       @id @default(autoincrement())
+  userId           Int       @map("user_id")
+  tokenJti         String    @unique @map("token_jti")
+  refreshTokenHash String?   @map("refresh_token_hash")
+  ipAddress        String?   @map("ip_address")
+  userAgent        String?   @map("user_agent")
+  expiresAt        DateTime  @map("expires_at")
+  revokedAt        DateTime? @map("revoked_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenJti])
+  @@map("jwt_sessions")
+}
+
+model Election {
+  id                Int       @id @default(autoincrement())
+  title             String
+  description       String
+  status            String    @default("DRAFT")
+  startTime         DateTime? @map("start_time")
+  endTime           DateTime? @map("end_time")
+  resultPublishedAt DateTime? @map("result_published_at")
+  createdBy         Int       @map("created_by")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  creator           User      @relation("ElectionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  candidates        Candidate[]
+  votes             Vote[]
+  aiAlerts          AiAlert[]
+
+  @@index([status])
+  @@map("elections")
+}
+
+model Candidate {
+  id         Int      @id @default(autoincrement())
+  electionId Int      @map("election_id")
+  name       String
+  party      String
+  manifesto  String
+  imageUrl   String?  @map("image_url")
+  color      String   @default("cyan")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  election   Election @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  votes      Vote[]
+
+  @@index([electionId])
+  @@map("candidates")
+}
+
+model Vote {
+  id               Int       @id @default(autoincrement())
+  userId           Int       @map("user_id")
+  electionId       Int       @map("election_id")
+  candidateId      Int       @map("candidate_id")
+  receiptCode      String    @unique @map("receipt_code")
+  receiptQrPayload String    @map("receipt_qr_payload")
+  receiptQrPath    String?   @map("receipt_qr_path")
+  ipAddress        String?   @map("ip_address")
+  deviceHash       String?   @map("device_hash")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  election         Election  @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  candidate        Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, electionId])
+  @@index([electionId])
+  @@index([candidateId])
+  @@index([userId, electionId])
+  @@map("votes")
+}
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+  actorId      Int?     @map("actor_id")
+  actorEmail   String   @map("actor_email")
+  module       String
+  action       String
+  detail       String
+  severity     String   @default("LOW")
+  ipAddress    String?  @map("ip_address")
+  metadataJson String?  @map("metadata_json")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  actor        User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([module, action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SecurityEvent {
+  id           Int      @id @default(autoincrement())
+  userId       Int?     @map("user_id")
+  eventType    String   @map("event_type")
+  riskScore    Int      @default(0) @map("risk_score")
+  ipAddress    String?  @map("ip_address")
+  deviceHash   String?  @map("device_hash")
+  description  String
+  metadataJson String?  @map("metadata_json")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([riskScore])
+  @@index([userId])
+  @@map("security_events")
+}
+
+model AiConversation {
+  id        Int         @id @default(autoincrement())
+  userId    Int?        @map("user_id")
+  context   String      @default("VOTER_CHATBOT")
+  title     String
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages  AiMessage[]
+
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             Int            @id @default(autoincrement())
+  conversationId Int            @map("conversation_id")
+  role           String
+  content        String
+  metadataJson   String?        @map("metadata_json")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("ai_messages")
+}
+
+model AiAlert {
+  id           Int       @id @default(autoincrement())
+  electionId   Int?      @map("election_id")
+  alertType    String    @map("alert_type")
+  severity     Int       @default(1)
+  title        String
+  message      String
+  status       String    @default("OPEN")
+  metadataJson String?   @map("metadata_json")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  resolvedAt   DateTime? @map("resolved_at")
+
+  election     Election? @relation(fields: [electionId], references: [id], onDelete: Cascade)
+
+  @@index([status, severity])
+  @@map("ai_alerts")
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  userId     Int?     @map("user_id")
+  roleTarget String?  @map("role_target")
+  title      String
+  message    String
+  type       String   @default("INFO")
+  isRead     Boolean  @default(false) @map("is_read")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model DsaOperation {
+  id          Int      @id @default(autoincrement())
+  module      String
+  operation   String
+  inputJson   String?  @map("input_json")
+  outputJson  String?  @map("output_json")
+  explanation String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("dsa_operations")
+}
