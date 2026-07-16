@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     show_dev_otp: bool = False
     firebase_project_id: str | None = None
     firebase_credentials_path: str | None = None
+    firebase_credentials_json: str | None = None
     smtp_host: str | None = None
     smtp_port: int = 587
     smtp_user: str | None = None
