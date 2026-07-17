@@ -46,7 +46,7 @@ export default function CandidatesPage() {
             <small>{candidate.party}</small>
             <h2>{candidate.name}</h2>
             <p>{candidate.manifesto}</p>
-            <Link className="btn secondary" href={`/candidates/${candidate.id}`}>Open profile</Link>
+            <Link className="btn secondary" href={`/candidate-profile?id=${candidate.id}`}>Open profile</Link>
           </article>
         ))}
       </section>

@@ -2,25 +2,30 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import AppShell from "../../components/AppShell";
-import { apiRequest, Candidate } from "../../lib/api";
+import AppShell from "../components/AppShell";
+import { apiRequest, Candidate } from "../lib/api";
 
-export default function CandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function CandidateProfilePage() {
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
       try {
-        const resolved = await params;
-        const data = await apiRequest<{ candidate: Candidate }>(`/candidates/${resolved.id}`);
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
+        if (!id) {
+          setMessage("Candidate ID missing.");
+          return;
+        }
+        const data = await apiRequest<{ candidate: Candidate }>(`/candidates/${id}`);
         setCandidate(data.candidate);
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "Candidate not found.");
       }
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [params]);
+  }, []);
 
   return (
     <AppShell title={candidate?.name ?? "Candidate Profile"} subtitle="Review manifesto, party and election details before voting.">
